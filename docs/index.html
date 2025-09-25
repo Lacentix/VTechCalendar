@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VTechCalendar - Convert Vilnius Tech PDFs to Calendar</title>
+    <link rel="icon" type="image/png" href="favicon.png">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script>pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';</script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .logo {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            height: 40px;
+            filter: brightness(0) invert(1);
+            z-index: 100;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            color: white;
+        }
+
+        header h1 {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .main-card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            padding: 40px;
+            margin-bottom: 30px;
+        }
+
+        .upload-area {
+            border: 3px dashed #667eea;
+            border-radius: 15px;
+            padding: 40px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 30px;
+            background: #f8f9ff;
+        }
+
+        .upload-area:hover {
+            border-color: #764ba2;
+            background: #f0f2ff;
+        }
+
+        .upload-area.dragover {
+            border-color: #764ba2;
+            background: #e8ebff;
+            transform: scale(1.02);
+        }
+
+        .upload-icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            color: #667eea;
+        }
+
+        #file-input {
+            display: none;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            margin: 10px 5px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+        .feature {
+            text-align: center;
+            padding: 20px;
+            background: #f8f9ff;
+            border-radius: 15px;
+        }
+
+        .feature-icon {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+        }
+
+        .status-message {
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+            text-align: center;
+            display: none;
+        }
+
+        .status-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .status-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .status-loading {
+            background: #cce7ff;
+            color: #004085;
+            border: 1px solid #b8daff;
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        footer {
+            text-align: center;
+            color: white;
+            opacity: 0.8;
+            margin-top: 40px;
+        }
+
+        footer a {
+            color: white;
+            text-decoration: underline;
+        }
+
+        .demo-section {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            margin-top: 20px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+
+        .demo-section h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+
+            header h1 {
+                font-size: 2rem;
+            }
+
+            .main-card {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/1/12/VILNIUS-TECH-LT.png" alt="Vilnius Tech Logo" class="logo">
+
+        <header>
+            <h1>VTechCalendar</h1>
+            <p>Convert your Vilnius Tech PDF timetable to calendar format</p>
+        </header>
+
+        <div class="main-card">
+            <div class="upload-area" onclick="document.getElementById('file-input').click()">
+                <div class="upload-icon">📄</div>
+                <h3>Upload your Vilnius Tech timetable PDF from Mano</h3>
+                <p>Click here or drag and drop your PDF file</p>
+                <input type="file" id="file-input" accept=".pdf">
+            </div>
+
+            <div id="status-message" class="status-message"></div>
+
+            <div class="feature-grid">
+                <div class="feature">
+                    <h4>Auto Convert</h4>
+                    <p>Extracts lecture times, subjects, and locations</p>
+                </div>
+                <div class="feature">
+                    <h4>Universal Format</h4>
+                    <p>Works with Google Calendar, Apple Calendar, Outlook</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="demo-section">
+            <h3>How it works:</h3>
+            <ol>
+                <li><strong>Upload</strong> your Vilnius Tech semester timetable PDF</li>
+                <li><strong>Process</strong> - we extract all lecture information automatically</li>
+                <li><strong>Download</strong> the ICS calendar file</li>
+                <li><strong>Import</strong> to your favorite calendar app</li>
+            </ol>
+
+            <h3>Supported Information:</h3>
+            <ul>
+                <li>Lecture times and durations</li>
+                <li>Subject names and course codes</li>
+                <li>Classroom locations</li>
+                <li>Lecturer names</li>
+                <li>Lecture types (Lectures, Lab work, Practical exercises)</li>
+                <li>Weekly recurring schedule</li>
+            </ul>
+        </div>
+
+        <footer>
+            <p>Made for Vilnius Tech students • <a href="https://github.com/lacentix/VTechCalendar" target="_blank">View on GitHub</a></p>
+        </footer>
+    </div>
+
+    <script>
+        const fileInput = document.getElementById('file-input');
+        const uploadArea = document.querySelector('.upload-area');
+        const statusMessage = document.getElementById('status-message');
+
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+
+        uploadArea.addEventListener('dragleave', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                fileInput.files = files;
+                handleFileUpload(files[0]);
+            }
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                handleFileUpload(e.target.files[0]);
+            }
+        });
+
+        function showStatus(message, type) {
+            statusMessage.textContent = message;
+            statusMessage.className = `status-message status-${type}`;
+            statusMessage.style.display = 'block';
+        }
+
+        function showLoading(message) {
+            statusMessage.innerHTML = `<div class="loading-spinner"></div>${message}`;
+            statusMessage.className = 'status-message status-loading';
+            statusMessage.style.display = 'block';
+        }
+
+        async function handleFileUpload(file) {
+            if (!file.type.includes('pdf')) {
+                showStatus('Please select a PDF file', 'error');
+                return;
+            }
+
+            if (file.size > 16 * 1024 * 1024) {
+                showStatus('File too large. Maximum size is 16MB', 'error');
+                return;
+            }
+
+            showLoading('Processing your PDF...');
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            const parser = new Parser();
+
+            try {
+                const icsContent = await parser.convertPDFToICS(file);
+
+                const blob = new Blob([icsContent], { type: 'text/calendar' });
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = file.name.replace('.pdf', '_schedule.ics');
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(a);
+
+                showStatus('Calendar file downloaded successfully! Import the .ics file into your calendar app', 'success');
+            } catch (error) {
+                showStatus(`Error: ${error.message}`, 'error');
+            }
+        }
+    </script>
+    <script src="parser.js"></script>
+</body>
+</html>

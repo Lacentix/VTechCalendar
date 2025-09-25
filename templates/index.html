@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VTechCalendar - Convert Vilnius Tech PDFs to Calendar</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📅 VTechCalendar</h1>
+            <p>Convert your Vilnius Tech PDF timetable to calendar format</p>
+        </header>
+
+        <div class="main-card">
+            <form id="upload-form" enctype="multipart/form-data">
+                <div class="upload-area" onclick="document.getElementById('file-input').click()">
+                    <div class="upload-icon">📄</div>
+                    <h3>Upload your Vilnius Tech timetable PDF</h3>
+                    <p>Click here or drag and drop your PDF file</p>
+                    <input type="file" id="file-input" name="file" accept=".pdf">
+                </div>
+            </form>
+
+            <div id="status-message" class="status-message"></div>
+
+            <div class="feature-grid">
+                <div class="feature">
+                    <div class="feature-icon">🔄</div>
+                    <h4>Auto Convert</h4>
+                    <p>Automatically extracts lecture times, subjects, and locations</p>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">📱</div>
+                    <h4>Universal Format</h4>
+                    <p>Works with Google Calendar, Apple Calendar, Outlook, and more</p>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">🔔</div>
+                    <h4>Smart Reminders</h4>
+                    <p>Set up notifications for all your classes automatically</p>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">🏫</div>
+                    <h4>Vilnius Tech Optimized</h4>
+                    <p>Specifically designed for Vilnius Tech schedule formats</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="demo-section">
+            <h3>How it works:</h3>
+            <ol>
+                <li><strong>Upload</strong> your Vilnius Tech semester timetable PDF</li>
+                <li><strong>Process</strong> - we extract all lecture information automatically</li>
+                <li><strong>Download</strong> the ICS calendar file</li>
+                <li><strong>Import</strong> to your favorite calendar app</li>
+            </ol>
+
+            <h3>Supported Information:</h3>
+            <ul>
+                <li>✅ Lecture times and durations</li>
+                <li>✅ Subject names and course codes</li>
+                <li>✅ Classroom locations</li>
+                <li>✅ Lecturer names</li>
+                <li>✅ Lecture types (Lectures, Lab work, Practical exercises)</li>
+                <li>✅ Weekly recurring schedule</li>
+            </ul>
+        </div>
+
+        <footer>
+            <p>Made for Vilnius Tech students • <a href="https://github.com/lacentix/VTechCalendar" target="_blank">View on GitHub</a></p>
+        </footer>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>
